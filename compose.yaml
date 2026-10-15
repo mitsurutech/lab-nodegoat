@@ -1,0 +1,61 @@
+# Web application security with OWASP NodeGoat: an insecure Node.js app and its MongoDB.
+#
+# Your copy is the only thing you may attack, and it is the only thing you can reach: this
+# lab has no way out to the internet. Never point a tool at a site you do not own, in a lab
+# or anywhere else.
+#
+# Press Open on the lab's page and sign in as user1 with the password User1_123 (the admin
+# is admin with Admin_123). The database is made for you each time the lab starts. NodeGoat
+# is the OWASP Top 10 one weakness at a time, with its own tutorial beside each page.
+#
+# Hand in a screenshot of each weakness you exploited and, for each, a paragraph saying what
+# the code did wrong and what the fixed code (the tutorial shows it) does instead.
+#
+# The application image is OWASP NodeGoat built unmodified at one upstream commit by
+# github.com/mitsurutech/lab-nodegoat (Apache-2.0, licence kept in the image), because
+# NodeGoat publishes no image of its own. Both services run as unprivileged accounts.
+
+services:
+  mongo:
+    image: mongo:4.4.30
+    user: mongodb
+    # A cache sized for the memory limit, or MongoDB sizes it from the machine and is stopped.
+    command: ["mongod", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25"]
+    healthcheck:
+      test: ["CMD", "mongo", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  nodegoat:
+    image: ghcr.io/mitsurutech/nodegoat@sha256:a1a84e9d386cc86156650fd97ae53459f24e4b02cfdef95fbf552b8e7ec99a1d
+    user: node
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/nodegoat
+    # NodeGoat's own start, as its docker-compose.yml does it: the database is reset, then the
+    # server runs. A marker says the reset finished and the healthcheck waits for it with the
+    # server, so "healthy" means you can sign in.
+    command:
+      - sh
+      - -c
+      - node artifacts/db-reset.js > /tmp/reset.log 2>&1 && touch /tmp/ready && exec node server.js
+    expose: ["4000"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/ready && wget -q -O /dev/null http://127.0.0.1:4000/login"]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    labels:
+      lab.title: OWASP NodeGoat
+      lab.open: "4000"
