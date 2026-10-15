@@ -1,0 +1,4 @@
+# The one upstream commit the image is built from. Changing it is a new tag and a new digest in compose.yaml.
+repository=OWASP/NodeGoat
+commit=c5cb68a7084e4ae7dcc60e6a98768720a81841e8
+tag=1.3.0-c5cb68a

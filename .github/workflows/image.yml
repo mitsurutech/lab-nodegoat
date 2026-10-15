@@ -1,0 +1,56 @@
+name: image
+
+on:
+  push:
+    branches: [main]
+    paths: [image/**, .github/workflows/image.yml]
+  workflow_dispatch:
+
+# Builds OWASP NodeGoat at the one commit named in image/UPSTREAM, with upstream's own
+# Dockerfile and not one line of its source changed, and publishes it as a public image.
+# NodeGoat publishes none of its own and is Apache-2.0, which allows this: its LICENSE
+# stays in the image (upstream's Dockerfile copies the whole tree) and beside it here.
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the pinned upstream commit
+        id: up
+        run: |
+          set -eu
+          . image/UPSTREAM
+          echo "repository=$repository" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ steps.up.outputs.repository }}
+          ref: ${{ steps.up.outputs.commit }}
+          path: upstream
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: upstream
+          file: upstream/Dockerfile
+          push: true
+          provenance: false
+          tags: ghcr.io/mitsurutech/nodegoat:${{ steps.up.outputs.tag }}
+          labels: |
+            org.opencontainers.image.title=OWASP NodeGoat
+            org.opencontainers.image.description=Unmodified build of github.com/OWASP/NodeGoat at the commit named in the revision label, for the MitsuruTech labs
+            org.opencontainers.image.source=https://github.com/mitsurutech/lab-nodegoat
+            org.opencontainers.image.url=https://github.com/OWASP/NodeGoat
+            org.opencontainers.image.revision=${{ steps.up.outputs.commit }}
+            org.opencontainers.image.licenses=Apache-2.0
+      - run: echo "${{ steps.build.outputs.digest }}" >> "$GITHUB_STEP_SUMMARY"
