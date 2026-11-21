@@ -95,3 +95,7 @@ Other labs in the same series, each its own repository and each with a [page in 
 - [lab-mysql-phpmyadmin](https://github.com/mitsurutech/lab-mysql-phpmyadmin): MySQL and phpMyAdmin
 - [lab-git-gitea](https://github.com/mitsurutech/lab-git-gitea): Git and Gitea
 - [lab-sample](https://github.com/mitsurutech/lab-sample): PostgreSQL and PostgREST
+
+## About the passwords in this repository
+
+The accounts above (`user1`, `user2`, `admin`) are NodeGoat's own published demo accounts. They are fixtures for a lab that runs only on your own computer or inside the platform, never real credentials, and they are written here on purpose.
