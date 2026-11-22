@@ -1,5 +1,7 @@
 # OWASP NodeGoat lab with Docker Compose: practise the OWASP Top 10 in a deliberately insecure Node.js app
 
+[English](README.md) | [Français](README.fr.md) | [Español](README.es.md) | [日本語](README.ja.md) | [Deutsch](README.de.md)
+
 [![check](https://github.com/mitsurutech/lab-nodegoat/actions/workflows/check.yml/badge.svg)](https://github.com/mitsurutech/lab-nodegoat/actions/workflows/check.yml)
 
 A ready-made **web application security lab** for classrooms, from the [MitsuruTech Learning Platform](https://mitsurutech.co.uk/learning), where schools and colleges give every student their own databases, containers and terminal in the browser. Each student gets their own copy of **OWASP NodeGoat**, a retirement savings website written in **Node.js with MongoDB** that has the **OWASP Top 10** weaknesses built in, to practise **injection, broken authentication, insecure direct object references, cross-site scripting** and more, with NodeGoat's own tutorial beside each one showing the fixed code. Nothing is installed and nobody else's machine is at risk.
